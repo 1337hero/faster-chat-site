@@ -1,0 +1,61 @@
+/* Catppuccin Mocha theme for Starlight */
+:root {
+  --sl-color-accent-low: #cba6f7;
+  --sl-color-accent: #b4befe;
+  --sl-color-accent-high: #89b4fa;
+  --sl-color-white: #cdd6f4;
+  --sl-color-gray-1: #bac2de;
+  --sl-color-gray-2: #a6adc8;
+  --sl-color-gray-3: #9399b2;
+  --sl-color-gray-4: #7f849c;
+  --sl-color-gray-5: #6c7086;
+  --sl-color-gray-6: #45475a;
+  --sl-color-black: #11111b;
+  --sl-color-bg: #1e1e2e;
+  --sl-color-bg-nav: #181825;
+  --sl-color-bg-sidebar: #181825;
+  --sl-color-bg-inline-code: #313244;
+}
+
+/* Dark mode colors (Starlight defaults to light, we want dark) */
+:root[data-theme='dark'] {
+  --sl-color-accent-low: #cba6f7;
+  --sl-color-accent: #b4befe;
+  --sl-color-accent-high: #89b4fa;
+  --sl-color-white: #cdd6f4;
+  --sl-color-gray-1: #bac2de;
+  --sl-color-gray-2: #a6adc8;
+  --sl-color-gray-3: #9399b2;
+  --sl-color-gray-4: #7f849c;
+  --sl-color-gray-5: #6c7086;
+  --sl-color-gray-6: #45475a;
+  --sl-color-black: #11111b;
+  --sl-color-bg: #1e1e2e;
+  --sl-color-bg-nav: #181825;
+  --sl-color-bg-sidebar: #181825;
+  --sl-color-bg-inline-code: #313244;
+}
+
+/* Custom scrollbar to match landing page */
+.sl-markdown-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sl-markdown-content::-webkit-scrollbar-track {
+  background: #181825;
+}
+
+.sl-markdown-content::-webkit-scrollbar-thumb {
+  background: #45475a;
+  border-radius: 4px;
+}
+
+.sl-markdown-content::-webkit-scrollbar-thumb:hover {
+  background: #585b70;
+}
+
+/* Selection color to match landing page */
+::selection {
+  background-color: #f5c2e7;
+  color: #1e1e2e;
+}

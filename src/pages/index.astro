@@ -1,0 +1,25 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { Navbar } from '../components/Navbar';
+import { Hero } from '../components/Hero';
+import { DemoVideo } from '../components/DemoVideo';
+import { Features } from '../components/Features';
+import { TechStack } from '../components/TechStack';
+import { InstallSection } from '../components/InstallSection';
+import { Footer } from '../components/Footer';
+---
+
+<Layout
+  title="Faster Chat - Self-Hosted AI Chat with Local LLMs | Privacy-First ChatGPT Alternative"
+  description="Open-source AI chat interface. Run local LLMs with Ollama or connect to OpenAI, Anthropic, Groq. Your conversations stay on your device. Self-hosted, privacy-first, blazingly fast."
+>
+  <Navbar client:load />
+  <main>
+    <Hero client:load />
+    <TechStack client:load />
+    <DemoVideo client:load />
+    <Features client:load />
+    <InstallSection client:load />
+  </main>
+  <Footer client:load />
+</Layout>

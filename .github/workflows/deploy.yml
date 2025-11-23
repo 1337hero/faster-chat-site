@@ -1,0 +1,82 @@
+name: Deploy Faster Chat Site
+
+on:
+  push:
+    branches: [ "main" ]
+
+concurrency:
+  group: fasterchat.ai-prod
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: Production
+      url: https://fasterchat.ai
+
+    env:
+      SITE_URL: https://fasterchat.ai
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_PORT: ${{ secrets.SSH_PORT }}
+      DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ---------- Node.js setup + caching ----------
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install deps
+        run: npm ci
+
+      # Build cache
+      - name: Compute build cache key
+        id: cache-key
+        run: |
+          echo "key=${{ runner.os }}-build-${{ hashFiles('**/*.{js,jsx,ts,tsx,css,scss,html,astro,md,mdx}', 'package-lock.json') }}" >> $GITHUB_OUTPUT
+
+      - name: Restore build cache
+        uses: actions/cache@v4
+        with:
+          path: dist
+          key: ${{ steps.cache-key.outputs.key }}
+
+      - name: Build
+        run: npm run build   # Astro outputs ./dist
+
+      # ---------- Upload dist as artifact ----------
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+          if-no-files-found: error
+          retention-days: 7
+
+      # ---------- SSH + Deploy ----------
+      - name: Start SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Ensure target dir exists
+        run: |
+          ssh -p "$SSH_PORT" -o StrictHostKeyChecking=accept-new "$SSH_USER@$SSH_HOST" "mkdir -p '$DEPLOY_PATH'"
+
+      - name: Deploy via rsync
+        run: |
+          rsync -az --delete \
+            --omit-dir-times \
+            -e "ssh -p $SSH_PORT -o StrictHostKeyChecking=accept-new" \
+            ./dist/ "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/"
