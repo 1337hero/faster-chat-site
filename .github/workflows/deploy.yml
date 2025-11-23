@@ -30,21 +30,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # ---------- Node.js setup + caching ----------
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      # ---------- Bun setup + caching ----------
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: '20'
-          cache: 'npm'
+          bun-version: latest
+
+      - name: Cache Bun deps
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
 
       - name: Install deps
-        run: npm ci
+        run: bun install --frozen-lockfile
 
-      # Build cache
+      # Build cache 
       - name: Compute build cache key
         id: cache-key
         run: |
-          echo "key=${{ runner.os }}-build-${{ hashFiles('**/*.{js,jsx,ts,tsx,css,scss,html,astro,md,mdx}', 'package-lock.json') }}" >> $GITHUB_OUTPUT
+          echo "key=${{ runner.os }}-build-${{ hashFiles('**/*.{js,jsx,ts,tsx,css,scss,html,astro,md,mdx}', 'bun.lockb') }}" >> $GITHUB_OUTPUT
 
       - name: Restore build cache
         uses: actions/cache@v4
@@ -53,7 +60,7 @@ jobs:
           key: ${{ steps.cache-key.outputs.key }}
 
       - name: Build
-        run: npm run build   # Astro outputs ./dist
+        run: bun run build   # Astro outputs ./dist
 
       # ---------- Upload dist as artifact ----------
       - name: Upload build artifact
@@ -77,6 +84,7 @@ jobs:
       - name: Deploy via rsync
         run: |
           rsync -az --delete \
+            --chown=${SSH_USER}:www-data --chmod=D2775,F664 \
             --omit-dir-times \
             -e "ssh -p $SSH_PORT -o StrictHostKeyChecking=accept-new" \
             ./dist/ "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/"
